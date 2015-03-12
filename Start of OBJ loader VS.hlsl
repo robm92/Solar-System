@@ -83,6 +83,7 @@ struct VS_OPTPUT
     float4 Pos		 : SV_POSITION;
 	float3 VecNormal : NORMAL;
 	float2 Tex		 : TEXCOORD0;
+	float4 worldPos  : POSITION;
 };
 
 
@@ -99,6 +100,9 @@ VS_OPTPUT VS_obj( VS_INPUT input )
 	// unlike the cubes sample.												//
 	//**********************************************************************//
 	output.Pos = mul( input.Pos, MatWorldViewProjection );
+
+	//position of planet... I think?
+	output.worldPos = mul(input.Pos, MatWorld);
    
 	//**********************************************************************//
 	// Whatever we do to the tiger, we must also do to its normal vector.	//

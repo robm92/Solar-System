@@ -27,7 +27,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>Start of OJB Loader</ProjectName>
+    <ProjectName>Solar System</ProjectName>
     <ProjectGuid>{D29C6982-A589-4081-89B1-91E78D7C41E2}</ProjectGuid>
     <RootNamespace>Tutorial07 - Textures and Constant buffers</RootNamespace>
     <Keyword>Win32Proj</Keyword>

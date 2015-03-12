@@ -47,6 +47,10 @@ struct Light
 	}
 	XMFLOAT3 dir;
 	float pad;
+	XMFLOAT3 pos;
+	float range;
+	XMFLOAT3 att;
+	float pad2;
 	XMFLOAT4 ambient;
 	XMFLOAT4 diffuse;
 };
@@ -100,7 +104,7 @@ std::wstring TrimEnd(std::wstring s)
 }
 
 void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmediateContext,
-					ID3D11Device* g_pd3dDevice)
+	ID3D11Device* g_pd3dDevice)
 {
 	std::vector<SimpleVertex> faceCount(0);
 	std::wifstream          fileStream;
@@ -314,7 +318,7 @@ void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmed
 
 	hResult = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
 
-	
+
 
 
 	//**************************************************************************//																		
@@ -413,10 +417,22 @@ void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmed
 	// colour in this case) that never change.  This is faster; don't update	//
 	// stuff if you don't have to.												//
 	//**************************************************************************//
-	light.dir = XMFLOAT3(0.25f, 0.5f, -1.0f);
-	light.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
+	if (textureName == L"Media\\earth\\sun.jpg")
+	{
+		light.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		light.range = 100.0f;
+		light.att = XMFLOAT3(0.0f, 0.05f, 0.0f);
+		light.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else
+	{
+		light.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		light.range = 100.0f;
+		light.att = XMFLOAT3(0.0f, 0.05f, 0.0f);
+		light.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.1f);
+		light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
 	CBNeverChanges cbNeverChanges;
 	cbNeverChanges.light = light;
 	g_pImmediateContext->UpdateSubresource(g_pCBNeverChanges,

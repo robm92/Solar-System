@@ -85,9 +85,9 @@ struct CBChangesEveryFrame
 	XMMATRIX matWorldViewProjection;
 };
 
-//std::vector <USHORT>    vectorIndices(0);
-//std::vector<SimpleVertex> faceCount(0);
+//stores the WVP matrix of the Earth so that the Moon can access it for earth orbit.
 XMMATRIX earthMatrix;
+XMMATRIX earthPosition;
 
 std::wstring Object::TrimStart(std::wstring s)
 {
@@ -318,9 +318,6 @@ void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmed
 
 	hResult = g_pd3dDevice->CreateBuffer(&bd, &InitData, &g_pVertexBuffer);
 
-
-
-
 	//**************************************************************************//																		
 	// Index buffer 															//
 	//**************************************************************************//
@@ -417,12 +414,20 @@ void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmed
 	// colour in this case) that never change.  This is faster; don't update	//
 	// stuff if you don't have to.												//
 	//**************************************************************************//
-	if (textureName == L"Media\\earth\\sun.jpg")
+	if (textureName == L"Media\\earth\\sun.jpg" )
 	{
 		light.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		light.range = 100.0f;
 		light.att = XMFLOAT3(0.0f, 0.05f, 0.0f);
 		light.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	else if (textureName == L"Media\\earth\\stars.jpg")
+	{
+		light.pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+		light.range = 100.0f;
+		light.att = XMFLOAT3(0.0f, 0.05f, 0.0f);
+		light.ambient = XMFLOAT4(0.6f, 0.6f, 0.6f, 0.6f);
 		light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else
@@ -461,7 +466,7 @@ void Object::LoadFromFile(UINT width, UINT height, ID3D11DeviceContext* g_pImmed
 
 void Object::Render(ID3D11DeviceContext* g_pImmediateContext, ID3D11RenderTargetView* g_pRenderTargetView,
 	ID3D11DepthStencilView* g_pDepthStencilView, ID3D11VertexShader* g_pVertexShader,
-	ID3D11PixelShader* g_pPixelShader, float eyeX, float eyeY, float eyeZ, float atX, float atY, float atZ)
+	ID3D11PixelShader* g_pPixelShader, float eyeX, float eyeY, float eyeZ, float atX, float atY, float atZ, bool aPressed)
 {
 
 	g_pImmediateContext->PSSetShaderResources(0, 1, &textureResource);
@@ -492,7 +497,6 @@ void Object::Render(ID3D11DeviceContext* g_pImmediateContext, ID3D11RenderTarget
 		XMMATRIX matPlanetScale = XMMatrixScaling(planetScale, planetScale, planetScale);
 		matPlanetWorld = matPlanetScale * matPlanetRotate * matPlanetTranslate *matPlanetOrbit * earthMatrix;
 
-
 		XMMATRIX matWVP = matPlanetWorld * matView * g_MatProjection;
 		// 
 		CBChangesEveryFrame cb;
@@ -500,7 +504,7 @@ void Object::Render(ID3D11DeviceContext* g_pImmediateContext, ID3D11RenderTarget
 		cb.matWorldViewProjection = XMMatrixTranspose(matWVP);
 		g_pImmediateContext->UpdateSubresource(g_pCBChangesEveryFrame, 0, NULL, &cb, 0, 0);
 	}
-	else if (textureName == L"Media\\earth\\test.png")
+	else if (textureName == L"Media\\earth\\satring.png")
 	{
 		XMMATRIX matPlanetTranslate = XMMatrixTranslation(g_f_PlanetX, g_f_PlanetY, g_f_PlanetZ);
 		XMMATRIX matPlanetRotate = XMMatrixRotationY(g_f_PlanetRY);

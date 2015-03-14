@@ -131,11 +131,12 @@ ID3D11VertexShader*                 g_pVertexShader = NULL;
 ID3D11PixelShader*                  g_pPixelShader = NULL;
 ID3D11InputLayout*                  g_pVertexLayout = NULL;
 HRESULT hr;
-Object Earth, Mercury, sun, pluto, venus, mercury, mars, jupiter, saturn, neptune, uranus, moon,saturnRings, skyBox;
+Object Earth, Mercury, sun, pluto, venus, mercury, mars, jupiter, saturn, neptune, uranus, moon, saturnRings, skyBox, pig;
 Gamepad *gamepad;
 
 float eyeX = 35, eyeY = 10, eyeZ = 4;
 float atX = 0, atY = 0, atZ = 0;
+bool aPressed = false;
 
 
 
@@ -489,6 +490,12 @@ HRESULT InitDevice()
 	//**************************************************************************//
 	// Load the obj mesh										//
 	//**************************************************************************//	
+	pig.filename = "Media\\pig\\pig.obj";
+	pig.textureName = L"Media\\pig\\pig_d.dds";
+	pig.planetScale = 0.4;
+	pig.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
+	pig.g_f_PlanetX = 27;
+
 	Mercury.filename = "Media\\earth\\earth.obj";
 	Mercury.textureName = L"Media\\earth\\mercury.jpg";
 	Mercury.planetScale = 0.8;
@@ -500,13 +507,13 @@ HRESULT InitDevice()
 	venus.planetScale = 1.0;
 	venus.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
 	venus.g_f_PlanetX = 9;
-	
+
 	Earth.filename = "Media\\earth\\earth.obj";
 	Earth.textureName = L"Media\\earth\\NewEarth.jpg";
 	Earth.planetScale = 1.7;
 	Earth.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
 	Earth.g_f_PlanetX = 13;
-	
+
 	moon.filename = "Media\\earth\\earth.obj";
 	moon.textureName = L"Media\\earth\\moon.jpg";
 	moon.planetScale = 0.2;
@@ -532,7 +539,7 @@ HRESULT InitDevice()
 	saturn.g_f_PlanetX = 30;
 
 	saturnRings.filename = "Media\\earth\\earth.obj";
-	saturnRings.textureName = L"Media\\earth\\test.png";
+	saturnRings.textureName = L"Media\\earth\\satring.png";
 	saturnRings.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
 	saturnRings.g_f_PlanetX = 30;
 
@@ -548,6 +555,14 @@ HRESULT InitDevice()
 	neptune.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
 	neptune.g_f_PlanetX = 40;
 
+	skyBox.filename = "Media\\earth\\skysphere.obj";
+	skyBox.textureName = L"Media\\earth\\stars.jpg";
+	skyBox.planetScale = 70;
+	skyBox.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
+	skyBox.g_f_PlanetX = 10;
+	//cleans up texture at start
+	skyBox.g_f_PlanetRY = XMConvertToRadians(90);
+
 	pluto.filename = "Media\\earth\\earth.obj";
 	pluto.textureName = L"Media\\earth\\pluto.jpg";
 	pluto.planetScale = 0.8;
@@ -559,6 +574,8 @@ HRESULT InitDevice()
 	sun.planetScale = 10;
 	sun.LoadFromFile(width, height, g_pImmediateContext, g_pd3dDevice);
 	sun.g_f_PlanetX = 0;
+
+	
 
 
 	//O.LoadFromFile("Media\\pig\\pig.obj", width, height, g_pImmediateContext, g_pd3dDevice);
@@ -657,7 +674,7 @@ void Render()
 			dwTimeStart = dwTimeCur;
 		t = (dwTimeCur - dwTimeStart) / 1000.0f;
 	}
-	
+
 
 	//gamepad->Rumble(1.0f, 1.0f);
 	GamepadCamera(true, gamepad);
@@ -667,65 +684,71 @@ void Render()
 	//            Render the Planets                   //
 	//*************************************************//
 	Earth.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	//rotation speed relative to planet size
 	Earth.g_f_PlanetRY = XMConvertToRadians(45) / Earth.planetScale *t;
 	Earth.planetOrbit = XMConvertToRadians(45) / Earth.g_f_PlanetX *t * 10;
 
 	moon.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	moon.g_f_PlanetRY = XMConvertToRadians(45) / moon.planetScale * t;
-	moon.planetOrbit = XMConvertToRadians(45) / Earth.g_f_PlanetX *t* 10;
+	moon.planetOrbit = XMConvertToRadians(45) / Earth.g_f_PlanetX *t * 10;
 
 	mars.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	mars.g_f_PlanetRY = XMConvertToRadians(45) / mars.planetScale * t;
-	mars.planetOrbit = XMConvertToRadians(45) / mars.g_f_PlanetX *t* 10;
+	mars.planetOrbit = XMConvertToRadians(45) / mars.g_f_PlanetX *t * 10;
 
 	jupiter.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	jupiter.g_f_PlanetRY = XMConvertToRadians(45) / jupiter.planetScale * t;
 	jupiter.planetOrbit = XMConvertToRadians(45) / jupiter.g_f_PlanetX *t * 10;
 
 	saturn.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	saturn.g_f_PlanetRY = XMConvertToRadians(45) / saturn.planetScale * t;
-	saturn.planetOrbit = XMConvertToRadians(45) / saturn.g_f_PlanetX *t* 10;
+	saturn.planetOrbit = XMConvertToRadians(45) / saturn.g_f_PlanetX *t * 10;
 
 	saturnRings.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	saturnRings.g_f_PlanetRY = XMConvertToRadians(45) / saturn.planetScale * t;
 	saturnRings.planetOrbit = XMConvertToRadians(45) / saturn.g_f_PlanetX *t * 10;
 
 	uranus.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	uranus.g_f_PlanetRY = XMConvertToRadians(45) / uranus.planetScale * t;
-	uranus.planetOrbit = XMConvertToRadians(45) / uranus.g_f_PlanetX *t* 10;
+	uranus.planetOrbit = XMConvertToRadians(45) / uranus.g_f_PlanetX *t * 10;
 
 	neptune.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	neptune.g_f_PlanetRY = XMConvertToRadians(45) / neptune.planetScale * t;
-	neptune.planetOrbit = XMConvertToRadians(45) / neptune.g_f_PlanetX *t* 10;
+	neptune.planetOrbit = XMConvertToRadians(45) / neptune.g_f_PlanetX *t * 10;
 
 	pluto.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	pluto.g_f_PlanetRY = XMConvertToRadians(45) / pluto.planetScale * t;
-	pluto.planetOrbit = XMConvertToRadians(45) / pluto.g_f_PlanetX *t* 10;
+	pluto.planetOrbit = XMConvertToRadians(45) / pluto.g_f_PlanetX *t * 10;
 
 	Mercury.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	Mercury.g_f_PlanetRY = XMConvertToRadians(45) / Mercury.planetScale * t;
-	Mercury.planetOrbit = XMConvertToRadians(45) / Mercury.g_f_PlanetX *t* 10;
+	Mercury.planetOrbit = XMConvertToRadians(45) / Mercury.g_f_PlanetX *t * 10;
 
 	venus.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	venus.g_f_PlanetRY = XMConvertToRadians(45) / venus.planetScale * t;
-	venus.planetOrbit = XMConvertToRadians(45) / venus.g_f_PlanetX *t* 10;
+	venus.planetOrbit = XMConvertToRadians(45) / venus.g_f_PlanetX *t * 10;
 
 	sun.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
-		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ);
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
 	sun.g_f_PlanetRY = XMConvertToRadians(45) / sun.planetScale *t;
 
+	skyBox.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
+
+	pig.Render(g_pImmediateContext, g_pRenderTargetView, g_pDepthStencilView,
+		g_pVertexShader, g_pPixelShader, eyeX, eyeY, eyeZ, atX, atY, atZ, aPressed);
+	pig.planetOrbit = XMConvertToRadians(45) / saturn.g_f_PlanetX *t * 10;
 
 	//
 	// Present our back buffer to our front buffer
@@ -773,6 +796,7 @@ void GamepadCamera(bool xboxEnabled, Gamepad* gamepad)
 	{
 		gamepad->Update();
 
+		aPressed = gamepad->GetButtonPressed(0);
 
 		float gamepadLTrig = gamepad->LeftTrigger();
 		float gamepadRTrig = gamepad->RightTrigger();
@@ -785,12 +809,12 @@ void GamepadCamera(bool xboxEnabled, Gamepad* gamepad)
 			float gamepadLX = gamepad->LeftStick_X();
 			float gamepadLY = gamepad->LeftStick_Y();
 
-			eyeZ  -= gamepadLX/100;
-			atZ += gamepadLX/50;
+			eyeZ -= gamepadLX / 100;
+			atZ += gamepadLX / 50;
 
-			eyeX  -= gamepadLY/100;
+			eyeX -= gamepadLY / 100;
 			//atY += gamepadLY/50;
-			
+
 
 		}
 
@@ -802,8 +826,8 @@ void GamepadCamera(bool xboxEnabled, Gamepad* gamepad)
 			float gamepadRX = gamepad->RightStick_X();
 			float gamepadRY = gamepad->RightStick_Y();
 
-			atZ += gamepadRX/50;
-			atY += gamepadRY/50;
+			atZ += gamepadRX / 50;
+			atY += gamepadRY / 50;
 
 		}
 		//rumble if close to sun
